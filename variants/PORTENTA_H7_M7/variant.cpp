@@ -68,10 +68,45 @@ const uint32_t analogInputPin[] = {
 #endif
 
 // ----------------------------------------------------------------------------
+#include "Arduino.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include "FreeRTOS.h"
+#include "task.h"
+#include "cmsis_os.h"
+
+osThreadId_t cm7_task_handle;
+const osThreadAttr_t cm7_task_attributes = {
+  .name = "cm7_task",
+  .stack_size = (uint32_t)128 * 4,
+  .priority = (osPriority_t) osPriorityHigh
+};
+
+void StartM7DefaultTask(void *argument);
+
+void StartM7DefaultTask(void *argument) {
+  HAL_RCCEx_EnableBootCore(RCC_BOOT_C2);
+  setup();
+  for (;;) {
+#if defined(CORE_CALLBACK)
+    CoreCallback();
+#endif
+    loop();
+    serialEventRun();
+  }
+}
+
+void initVariant() {
+/* Configure the System clock source, PLL Multiplier and Divider factors,
+     AHB/APBx prescalers and Flash settings */
+  SystemClock_Config();
+  SystemCoreClockUpdate();
+  cm7_task_handle = osThreadNew(StartM7DefaultTask, NULL, &cm7_task_attributes);
+  return;
+}
 
 /**
   * @brief  System Clock Configuration
