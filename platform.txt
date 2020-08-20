@@ -46,8 +46,7 @@ compiler.define=-DARDUINO=
 # These can be overriden in boards.txt
 build.extra_flags=
 build.bootloader_flags=
-#build.ldscript=ldscript.ld
-build.ldscript=linker_script.ld
+build.ldscript=ldscript.ld
 
 # These can be overridden in platform.local.txt
 compiler.c.extra_flags=
