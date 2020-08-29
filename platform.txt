@@ -55,9 +55,9 @@ build.bootloader_flags=
 build.ldscript=ldscript.ld
 
 # These can be overridden in platform.local.txt
-compiler.c.extra_flags=
-compiler.c.elf.extra_flags=
-compiler.cpp.extra_flags=
+compiler.c.extra_flags={compiler.ph7.extra_defines} {compiler.ph7.c.extra_flags}
+compiler.c.elf.extra_flags={compiler.ph7.c.elf.extra_flags}
+compiler.cpp.extra_flags={compiler.ph7.extra_defines} {compiler.ph7.cpp.extra_flags}
 compiler.cpp.std=gnu++14
 compiler.S.extra_flags={build.startup_file}
 compiler.ar.extra_flags=
@@ -109,7 +109,7 @@ build.opt.path={build.path}/sketch/{build.opt.name}
 extras.path={build.system.path}/extras
 
 # Create empty {build.opt} if not exists in the output sketch dir and force include of SrcWrapper library
-recipe.hooks.prebuild.1.pattern="{extras.path}/prebuild.sh" "{build.path}" "{build.source.path}" 
+recipe.hooks.prebuild.1.pattern="{extras.path}/prebuild.sh" "{build.path}" "{build.source.path}"
 recipe.hooks.prebuild.1.pattern.windows="{runtime.tools.STM32Tools.path}/tools/win/busybox.exe" sh "{extras.path}/prebuild.sh" "{build.path}" "{build.source.path}"
 
 # compile patterns
@@ -188,7 +188,15 @@ tools.hid_upload.path.macosx={runtime.tools.STM32Tools.path}/tools/macosx
 tools.hid_upload.path.linux={runtime.tools.STM32Tools.path}/tools/linux
 tools.hid_upload.upload.params.verbose=-d
 tools.hid_upload.upload.params.quiet=n
-tools.hid_upload.upload.pattern="{path}/{cmd}" "{build.path}/{build.project_name}.bin" {serial.port.file}                                                                                                                             
+tools.hid_upload.upload.pattern="{path}/{cmd}" "{build.path}/{build.project_name}.bin" {serial.port.file}
+
+# DFU_UTIL
+# To use this tool, run `chmod +x dfu-util.sh` under {runtime.tools.STM32Tools.path}/tools/macosx
+tools.dfu-util.path.macosx={runtime.tools.STM32Tools.path}/tools/macosx
+tools.dfu-util.cmd=dfu-util.sh
+tools.dfu-util.upload.params.verbose=-d
+tools.dfu-util.upload.params.quiet=
+tools.dfu-util.upload.pattern="{path}/{cmd}" --device {upload.vid}:{upload.pid} -D "{build.path}/{build.project_name}.bin" -a{upload.interface} --dfuse-address={upload.address}:leave
 
 # Upload using Maple bootloader over DFU
 tools.maple_upload.cmd=maple_upload.sh
@@ -207,4 +215,4 @@ tools.remoteproc_gen.busybox.windows={path}/win/busybox.exe
 tools.remoteproc_gen.script=run_arduino_gen.sh
 tools.remoteproc_gen.upload.params.verbose=
 tools.remoteproc_gen.upload.params.quiet=
-tools.remoteproc_gen.upload.pattern="{busybox}" sh "{path}/{script}" generate "{build.path}/{build.project_name}.elf" "{build.path}/run_arduino_{build.project_name}.sh" 
+tools.remoteproc_gen.upload.pattern="{busybox}" sh "{path}/{script}" generate "{build.path}/{build.project_name}.elf" "{build.path}/run_arduino_{build.project_name}.sh"
